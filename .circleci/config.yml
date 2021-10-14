@@ -38,8 +38,8 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
-            --request GET https://api.memstash.io/values/migration_status-${CIRCLE_WORKFLOW_ID}) 
+            SUCCESS=$(curl -H "token: << parameters.workflow_id >>" \
+            --request GET https://api.memstash.io/values/migration_status_<< parameters.workflow_id >>) 
 
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
@@ -331,7 +331,7 @@ jobs:
             yum install -y tar gzip
 
             curl -H "Content-Type: text/plain" \
-              -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+              -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request PUT \
               --data ${BACKEND_DNS} \
               https://api.memstash.io/values/backend_dns
@@ -416,7 +416,8 @@ jobs:
               if grep "has been executed successfully" output.txt
               then
                 success="1"
-                curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data ${success} \
+                curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+                --request PUT --data ${success} \
                 https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
               fi 
       - persist_to_workspace:
@@ -542,13 +543,15 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request GET https://api.memstash.io/values/backendurl > backend-url.txt
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query "Reservations[*].Instances[*].PublicIpAddress" \
+              --output text)
 
-            BACKEND_URL=$(cat backend-url.txt)
-            BACKEND_URL="https://${BACKEND_URL}:3030/api/status"
+            echo "${BACKEND_IP}"
 
-            echo Backend URL: "${BACKEND_URL}"
+            curl -s "http://${BACKEND_IP}:3030/api/status" | grep "ok"
+                
       - run:
           name: Frontend smoke test.
           command: |
@@ -562,6 +565,8 @@ jobs:
               echo "Unsuccessful Smoke-test"
               exit 1
             fi 
+      - revert-migrations:
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:  
           workflow-id: "${CIRCLE_WORKFLOW_ID}"
   
