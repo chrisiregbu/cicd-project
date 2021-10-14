@@ -161,7 +161,7 @@ jobs:
             sudo npm i
             sudo npm run test
 
-      # In the event from-backend has failed, alert UdaPeople
+      # In the event test-frontend has failed, alert UdaPeople
       - slack/notify:
           template: basic_fail_1
           custom: | 
