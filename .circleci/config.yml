@@ -110,7 +110,7 @@ jobs:
 
   build-backend:
     docker:
-      - image: << pipeline.parameters.circleci_image >> #line.parameters.circleci_image >>circleci/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - run: echo "Build the backend"
       - checkout
@@ -178,7 +178,7 @@ jobs:
 
   test-backend:
     docker:
-      - image: << pipeline.parameters.circleci_image >> # circleci/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - run: echo "Test the backend"
       - checkout
@@ -212,7 +212,7 @@ jobs:
   # Scan for known vulnerabilities
   scan-frontend:
     docker:
-      - image: << pipeline.parameters.circleci_image >> # circleci/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - run: echo "Scan the frontend"
       - checkout
@@ -245,7 +245,7 @@ jobs:
 
   scan-backend:
     docker:
-      - image: << pipeline.parameters.circleci_image >> # circleci/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - run: echo "Scan the backend"
       - checkout
@@ -278,7 +278,7 @@ jobs:
   # 1. Infrastructure Phase - Create/Deploy/Configure Infrastructure
   deploy-infrastructure:
     docker:
-      - image: << pipeline.parameters.amazon_image >> # amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
       - checkout
       # Install required tar utility for this image to have workflow workspace capability.
@@ -348,7 +348,7 @@ jobs:
   # Configure infrastructure selceting a Docker image that supports Ansible
   configure-infrastructure:
     docker:
-      - image: << pipeline.parameters.alpine_image >> # python:3.9.1-alpine3.12
+      - image: python:3.9.1-alpine3.12
     steps:
       - checkout
       # Add the SSH key fingerprint to job so that Ansible will have access to the EC2 instance via SSH.
@@ -430,7 +430,7 @@ jobs:
     
   deploy-frontend:
     docker:
-      - image: << pipeline.parameters.amazon_image >> # amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
@@ -467,7 +467,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: << pipeline.parameters.alpine_image >> # python:3.9.1-alpine3.12  # supports Ansible
+      - image: python:3.9.1-alpine3.12  # supports Ansible
     steps:
       - checkout
       # Add ssh keys with fingerprint
@@ -521,7 +521,7 @@ jobs:
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
-      - image: << pipeline.parameters.alpine_image >> # circleci/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run:
@@ -568,7 +568,7 @@ jobs:
   # 5. Promotion Phase
   cloudfront-update:
     docker:
-      - image: << pipeline.parameters.amazon_image >> # amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
