@@ -319,6 +319,14 @@ jobs:
 
             cat .circleci/ansible/inventory.txt
 
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --region ${AWS_DEFAULT_REGION} \
+              --filters 'Name=tag:project,Values=udapeople-backend' \
+              --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
+              --output text)
+
+              echo $BACKEND_IP
+              
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
       - persist_to_workspace: 
