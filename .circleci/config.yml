@@ -11,11 +11,11 @@ commands:
   destroy-environment: 
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      workflow-id:
+      workflow_id:
         type: string
     steps:
       - run:
-          name: Destroy environment << parameters.workflow-id >>
+          name: Destroy environment << parameters.workflow_id >>
           # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable whereas  
           # ${CIRCLE_WORKFLOW_ID:0:7} takes the first 7 chars of the variable CIRCLE_CI_WORKFLOW_ID 
           when: on_fail
@@ -29,7 +29,7 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      workflow-id:
+      workflow_id:
         type: string 
     steps:
       - run:
@@ -313,7 +313,7 @@ jobs:
           name: Add back-end Public (IPv4) address to ansible inventory
           command: |        
             cd .circleci/ansible/
-            rm ./inventory.txt
+            rm ./.circleci/ansible/inventory.txt
 
             BACKEND_DNS=$(aws ec2 describe-instances \
               --region ${AWS_DEFAULT_REGION} \
@@ -321,10 +321,10 @@ jobs:
               --query "Reservations[*].Instances[0].PublicDnsName" \
               --output text)
 
-            echo "[web]" >> ./inventory.txt
-            echo ${BACKEND_DNS} >> ./inventory.txt
+            echo "[web]" >> ./.circleci/ansible/inventory.txt
+            echo ${BACKEND_DNS} >> ./.circleci/ansible/inventory.txt
 
-            cat ./inventory.txt
+            cat ./.circleci/ansible/inventory.txt
 
             yum install -y tar gzip
 
@@ -341,7 +341,7 @@ jobs:
           paths: 
               - .circleci/ansible/inventory.txt
       - destroy-environment:
-          workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # Configure infrastructure selceting a Docker image that supports Ansible
   configure-infrastructure:
@@ -368,7 +368,7 @@ jobs:
             cat ./.circleci/ansible/inventory.txt         
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # 2. Deploy Phase - Database Migrations/Deploy Front-End/Deploy Back-End
   run-migrations:
@@ -423,9 +423,9 @@ jobs:
           paths:
             - backend
       - revert-migrations:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
     
   deploy-frontend:
     docker:
@@ -462,7 +462,7 @@ jobs:
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       # Rollback on failure
       - destroy-environment:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-backend:
     docker:
@@ -515,7 +515,7 @@ jobs:
 
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
@@ -564,9 +564,9 @@ jobs:
               exit 1
             fi 
       - revert-migrations:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:  
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
@@ -603,9 +603,9 @@ jobs:
 
             echo Old Workflow Id: "${OldWorkflowID}"
       - destroy-environment:  
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
-          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # Setup Back-End Monitoring
   # Create a job that uses Ansible to go into the EC2 instance and install the exporter.
