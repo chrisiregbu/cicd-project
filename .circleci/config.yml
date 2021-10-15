@@ -312,12 +312,20 @@ jobs:
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end IP to ansible inventory
           command: |
-            aws ec2 describe-instances \ 
+            BACKEND_IP=$(aws ec2 describe-instances \ 
               --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text >> ./.circleci/ansible/inventory.txt
+              --query 'Reservations[*].Instances[0].PublicIpAddress' \
+              --output text)
 
-            cat ./.circleci/ansible/inventory.txt
+            echo ${BACKEND_IP}
+
+            BACKEND_DNS=$(aws ec2 describe-instances \
+              --region ${AWS_DEFAULT_REGION} \
+              --filters 'Name=tag:project,Values=udapeople-backend' \ 
+              --query "Reservations[*].Instances[0].PublicDnsName" \
+              --output text)
+
+            echo ${BACKEND_DNS}
 
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
