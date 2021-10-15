@@ -312,24 +312,17 @@ jobs:
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end Public (IPv4) address to ansible inventory
           command: |        
-            BACKEND_DNS=$(aws ec2 describe-instances \
+            aws ec2 describe-instances \
               --region ${AWS_DEFAULT_REGION} \
               --filters 'Name=tag:project,Values=udapeople-backend' \
               --query "Reservations[*].Instances[0].PublicDnsName" \
-              --output text)
+              --output text >> ./.circleci/ansible/inventory.txt
 
-            echo "[web]" >> ./.circleci/ansible/inventory.txt
-            echo ${BACKEND_DNS} >> ./.circleci/ansible/inventory.txt
+            export BACKEND_DNS=$(cat ./.circleci/ansible/inventory.txt)
+            echo "${BACKEND_DNS}"
 
-            cat ./.circleci/ansible/inventory.txt
-
-            yum install -y tar gzip
-
-            curl -H "Content-Type: text/plain" \
-              -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request PUT \
-              --data ${BACKEND_DNS} \
-              https://api.memstash.io/values/backend_dns
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request PUT --data "${BACKEND_DNS}" https://api.memstash.io/values/backend_dns
 
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
