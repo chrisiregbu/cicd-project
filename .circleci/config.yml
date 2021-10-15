@@ -318,7 +318,10 @@ jobs:
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
               --output text)
 
+            echo $BACKEND_IP
             echo "${BACKEND_IP}" >> .circleci/ansible/inventory.txt
+            
+            cat .circleci/ansible/inventory.txt
 
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
