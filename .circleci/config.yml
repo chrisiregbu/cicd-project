@@ -290,6 +290,16 @@ jobs:
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople-backend
 
+              export BACKEND_DNS=$(aws ec2 describe-instances  \
+              --region ${AWS_DEFAULT_REGION}  \
+              --filters 'Name=tag:project,Values=Udapeople-backend' \
+              --query "Reservations[*].Instances[0].PublicDnsName"  \
+              --output text)
+            
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request PUT --data "${BACKEND_DNS}" \
+              https://api.memstash.io/values/backendurl
+
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -302,16 +312,13 @@ jobs:
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end Public (IPv4) address to ansible inventory
           command: |
-            BACKEND_DNS=$(aws ec2 describe-instances \ 
+            aws ec2 describe-instances \ 
             --region ${AWS_DEFAULT_REGION} \
-            --filters 'Name=tag:project,Values=udapeople-backend' \
+            --filters 'Name=tag:project,Values=Udapeople-backend' \
             --query "Reservations[*].Instances[0].PublicDnsName" \
-            --output text)
+            --output text >> ./.circleci/ansible/inventory.txt
             
-            echo "${BACKEND_DNS}"
-
-            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request PUT data ${BACKEND_DNS} https://api.memstash.io/values/backend_dns
+            cat .circleci/ansible/inventory.txt
 
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
