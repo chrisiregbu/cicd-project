@@ -316,7 +316,7 @@ jobs:
             aws ec2 describe-instances \ 
               --region ${AWS_DEFAULT_REGION} \
               --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query 'Reservations[*].Instances[*].PublicDns' \
+              --query 'Reservations[].Instances[].PublicIpAddress' \
               --output text >> ./.circleci/ansible/inventory.txt
 
             cat ./.circleci/ansible/inventory.txt
