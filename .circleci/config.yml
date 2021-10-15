@@ -315,7 +315,7 @@ jobs:
             export BACKEND_IP=$(aws ec2 describe-instances \
               --region ${AWS_DEFAULT_REGION} \
               --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query 'Reservations[*].Instances[0].[PublicIpAddress]' \
+              --query 'Reservations[*].Instances[0].PublicIpAddress' \
               --output text)
 
             echo $BACKEND_IP
