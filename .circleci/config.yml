@@ -305,7 +305,7 @@ jobs:
             BACKEND_DNS=$(aws ec2 describe-instances \ 
             --region ${AWS_DEFAULT_REGION} \
             --filters 'Name=tag:project,Values=udapeople-backend' \
-            --query "Reservations[*].Instances[0].PublicDnsName" 
+            --query "Reservations[*].Instances[0].PublicDnsName" \
             --output text)
             
             echo "${BACKEND_DNS}"
