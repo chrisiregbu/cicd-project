@@ -288,18 +288,8 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=Udapeople-backend  
+              --tags project=udapeople-backend
 
-            export BACKEND_DNS=$(aws ec2 describe-instances  \
-              --region ${AWS_DEFAULT_REGION}  \
-              --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query "Reservations[*].Instances[0].PublicDnsName"  \
-              --output text)
-            
-            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request PUT --data "${BACKEND_DNS}" \
-              https://api.memstash.io/values/backend_dns
-              
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -307,17 +297,22 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=Udapeople-frontend
+              --tags project=udapeople-frontend
 
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end Public (IPv4) address to ansible inventory
           command: |
-            export BACKEND_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
-            --request GET https://api.memstash.io/values/backend_dns)
-
+            BACKEND_DNS=$(aws ec2 describe-instances \ 
+            --region ${AWS_DEFAULT_REGION} \
+            --filters 'Name=tag:project,Values=udapeople-backend' \
+            --query "Reservations[*].Instances[0].PublicDnsName" 
+            --output text)
+            
             echo "${BACKEND_DNS}"
+            echo ${BACKEND_DNS} >> ./.circleci/ansible/inventory.txt
 
-            cat BACKEND_DNS >> ./.circleci/ansible/inventory.txt
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request PUT data ${BACKEND_DNS} https://api.memstash.io/values/backend_dns
 
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
@@ -446,7 +441,6 @@ jobs:
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-      # Rollback on failure
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -455,7 +449,6 @@ jobs:
       - image: python:3.9.1-alpine3.12  # supports Ansible
     steps:
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints:
             - "72:a2:a0:42:ac:c9:2e:88:36:56:03:b4:49:fa:fb:25"
