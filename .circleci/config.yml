@@ -290,7 +290,6 @@ jobs:
               --tags project=udapeople-backend
 
               export BACKEND_DNS=$(aws ec2 describe-instances  \
-              --region ${AWS_DEFAULT_REGION}  \
               --filters 'Name=tag:project,Values=udapeople-backend' \
               --query "Reservations[*].Instances[*].PublicDns"  \
               --output text)
@@ -311,10 +310,9 @@ jobs:
               --tags project=udapeople-frontend
 
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
-          name: Add back-end Public (IPv4) address to ansible inventory
+          name: Add back-end IP to ansible inventory
           command: |
             aws ec2 describe-instances \ 
-              --region ${AWS_DEFAULT_REGION} \
               --filters 'Name=tag:project,Values=udapeople-backend' \
               --query 'Reservations[].Instances[].PublicIpAddress' \
               --output text >> ./.circleci/ansible/inventory.txt
