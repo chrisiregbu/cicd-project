@@ -20,13 +20,11 @@ commands:
           # ${CIRCLE_WORKFLOW_ID:0:7} takes the first 7 chars of the variable CIRCLE_CI_WORKFLOW_ID 
           when: on_fail
           command: |
-            if aws s3 ls | grep udapeople-${CIRCLE_WORKFLOW_ID:0:7}; then
-              aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            if aws s3 ls | grep udapeople-<< parameters.workflow_id >>; then
+              aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
             fi
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations:
-            workflow-id: "${CIRCLE_WORKFLOW_ID}"
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -343,7 +341,7 @@ jobs:
           paths: 
               - .circleci/ansible/inventory.txt
       - destroy-environment:
-          workflow-id: "${CIRCLE_WORKFLOW_ID}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # Configure infrastructure selceting a Docker image that supports Ansible
   configure-infrastructure:
@@ -370,7 +368,7 @@ jobs:
             cat ./.circleci/ansible/inventory.txt         
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment:
-          workflow-id: "${CIRCLE_WORKFLOW_ID}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # 2. Deploy Phase - Database Migrations/Deploy Front-End/Deploy Back-End
   run-migrations:
@@ -427,7 +425,7 @@ jobs:
       - revert-migrations:
           workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
-          workflow-id: "${CIRCLE_WORKFLOW_ID}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
     
   deploy-frontend:
     docker:
@@ -464,7 +462,7 @@ jobs:
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       # Rollback on failure
       - destroy-environment:
-          workflow-id: "${CIRCLE_WORKFLOW_ID}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-backend:
     docker:
@@ -517,7 +515,7 @@ jobs:
 
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment:
-          workflow-id: "${CIRCLE_WORKFLOW_ID}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
@@ -568,7 +566,7 @@ jobs:
       - revert-migrations:
           workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:  
-          workflow-id: "${CIRCLE_WORKFLOW_ID}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
@@ -605,7 +603,7 @@ jobs:
 
             echo Old Workflow Id: "${OldWorkflowID}"
       - destroy-environment:  
-          workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+          workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
           workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -628,8 +626,6 @@ jobs:
             export hostname=$(cat ./.circleci/ansible/inventory.txt)
             echo EC2 instance: "${hostname}"
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -vvv -i .circleci/ansible/inventory.txt .circleci/ansible/configure-prometheus-node-exporter/tasks/main.yml
-      - destroy-environment:  
-          workflow-id: "${CIRCLE_WORKFLOW_ID}" 
 
   # 6. Cleanup Phase
   cleanup:
@@ -666,9 +662,7 @@ jobs:
               aws cloudformation delete-stack --stack-name udapeople-backend-"${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name udapeople-frontend-"${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name udapeople-cloudfront
-            fi
-      - destroy-environment:  
-          workflow-id: "${CIRCLE_WORKFLOW_ID}" 
+            fi 
 
 # Orchestrate or schedule the jobs
 workflows:
@@ -703,5 +697,5 @@ workflows:
           requires: [smoke-test]
       - install-node-exporter:
           requires: [cloudfront-update]
-      # - cleanup:
-      #     requires: [cloudfront-update]
+      - cleanup:
+          requires: [cloudfront-update]
