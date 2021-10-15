@@ -313,8 +313,7 @@ jobs:
           name: Add back-end Public (IPv4) address to ansible inventory
           command: |        
             cd .circleci/ansible/
-            rm ./.circleci/ansible/inventory.txt
-
+          
             BACKEND_DNS=$(aws ec2 describe-instances \
               --region ${AWS_DEFAULT_REGION} \
               --filters 'Name=tag:project,Values=udapeople-backend' \
