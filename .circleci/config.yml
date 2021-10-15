@@ -289,15 +289,15 @@ jobs:
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople-backend
 
-              export BACKEND_DNS=$(aws ec2 describe-instances  \
-              --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query "Reservations[*].Instances[*].PublicDns"  \
-              --output text)
+            export BACKEND_URL=$(aws cloudformation describe-stacks \
+              --stack-name udapeople-backend-"${CIRCLE_WORKFLOW_ID}" \
+              --query "Stacks[0].Outputs[?OutputKey=='BackendURL'].OutputValue" \
+              --no-paginate --output text)
 
-              echo "${BACKEND_DNS}"
+            echo $BACKEND_URL
 
             curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request PUT --data "${BACKEND_DNS}" \
+              --request PUT --data "${BACKEND_URL}" \
               https://api.memstash.io/values/backendurl
 
       - run:
@@ -312,21 +312,13 @@ jobs:
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end IP to ansible inventory
           command: |
-            BACKEND_IP=$(aws ec2 describe-instances \ 
-              --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query 'Reservations[*].Instances[0].PublicIpAddress' \
-              --output text)
+            export BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request GET https://api.memstash.io/values/backendurl)
 
-            echo ${BACKEND_IP}
+            echo "${BACKEND_URL}" >> .circleci/ansible/inventory.txt
 
-            BACKEND_DNS=$(aws ec2 describe-instances \
-              --region ${AWS_DEFAULT_REGION} \
-              --filters 'Name=tag:project,Values=udapeople-backend' \ 
-              --query "Reservations[*].Instances[0].PublicDnsName" \
-              --output text)
-
-            echo ${BACKEND_DNS}
-
+            cat .circleci/ansible/inventory.txt
+            
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
       - persist_to_workspace: 
