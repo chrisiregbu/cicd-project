@@ -75,7 +75,7 @@ jobs:
       - run: echo "Build the frontend"
       - checkout
       - restore_cache:
-          key: frontend-build
+          keys: [frontend-build]
       - run:
           name: Front-end build
           command: |
@@ -113,7 +113,7 @@ jobs:
       - run: echo "Build the backend"
       - checkout
       - restore_cache:
-          key: backend-build
+          keys: [backend-build]
       - run:
           name: Back-end build
           command: |
@@ -148,7 +148,7 @@ jobs:
       - run: echo "Test the frontend"
       - checkout
       - restore_cache:
-          key: frontend-test
+          keys: [frontend-test]
       - run:
           name: frontend test
           command: |
@@ -180,7 +180,7 @@ jobs:
       - run: echo "Test the backend"
       - checkout
       - restore_cache:
-          key: backend-test
+          keys: [backend-test]
       - run:
           name: backend test 
           command: |
@@ -214,7 +214,7 @@ jobs:
       - run: echo "Scan the frontend"
       - checkout
       - restore_cache:
-          key: frontend-scan
+          keys: [frontend-scan]
       - run: 
           name: frontend scan
           command: |
@@ -247,7 +247,7 @@ jobs:
       - run: echo "Scan the backend"
       - checkout
       - restore_cache:
-          key: backend-scan
+          keys: [backend-scan]
       - run:
           name: backend scan
           command: |
