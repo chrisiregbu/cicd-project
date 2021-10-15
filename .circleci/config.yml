@@ -292,7 +292,7 @@ jobs:
 
               export BACKEND_DNS=$(aws ec2 describe-instances  \
               --region ${AWS_DEFAULT_REGION}  \
-              --filters 'Name=tag:project,Values=Udapeople-backend' \
+              --filters 'Name=tag:project,Values=udapeople-backend' \
               --query "Reservations[*].Instances[0].PublicDnsName"  \
               --output text)
             
@@ -314,8 +314,8 @@ jobs:
           command: |
             aws ec2 describe-instances \ 
               --region ${AWS_DEFAULT_REGION} \
-              --filters 'Name=tag:project,Values=Udapeople-backend' \
-              --query "Reservations[*].Instances[*].PublicDnsName" \
+              --filters 'Name=tag:project,Values=udapeople-backend' \
+              --query "Reservations[].Instances[].PublicDnsName" \
               --output text >> ./.circleci/ansible/inventory.txt
             
             cat .circleci/ansible/inventory.txt
