@@ -293,7 +293,7 @@ jobs:
               export BACKEND_DNS=$(aws ec2 describe-instances  \
               --region ${AWS_DEFAULT_REGION}  \
               --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query "Reservations[*].Instances[0].PublicDnsName"  \
+              --query "Reservations[*].Instances[*].PublicDns"  \
               --output text)
             
             curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
@@ -315,10 +315,12 @@ jobs:
             aws ec2 describe-instances \ 
               --region ${AWS_DEFAULT_REGION} \
               --filters 'Name=tag:project,Values=udapeople-backend' \
-              --query "Reservations[].Instances[].PublicDnsName" \
+              --query "Reservations[*].Instances[*].PublicDns" \
               --output text >> ./.circleci/ansible/inventory.txt
-            
-            cat .circleci/ansible/inventory.txt
+
+            echo  cat output.txt
+            export BACKEND_DNS=$(cat ./.circleci/ansible/inventory.txt)
+            echo "${BACKEND_DNS}""
 
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
