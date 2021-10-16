@@ -389,17 +389,14 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            status_code="${PIPESTATUS[0]}"
-            if [[ ! "${status_code}" == 0 ]]; then
-              exit 1
-            fi
-
             if cat migration-log.txt | grep "has been executed successfully" ./backend/migration-log.txt
             then
+              echo "Sending migration results to memstash"
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
                 --request PUT --data "1" \
                 https://api.memstash.io/values/migration-"${CIRCLE_WORKFLOW_ID:0:7}"
             else
+              echo "Could not send migration results to memstash"
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
                 --request PUT --data "0" \
                 https://api.memstash.io/values/migration_status_${CIRCLE_WORKFLOW_ID}
