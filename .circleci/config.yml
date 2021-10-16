@@ -510,7 +510,7 @@ jobs:
 
             echo $BACKEND_URL
 
-            curl -s "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
+            curl -v "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
       - run:
           name: Frontend smoke test.
           command: |
