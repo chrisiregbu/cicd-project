@@ -36,13 +36,11 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -H "token: << parameters.workflow_id >>" \
-            --request GET https://api.memstash.io/values/migration_status_<< parameters.workflow_id >>) 
+            status=$(curl -H "token: << parameters.workflow_id >>" \
+            --request GET https://api.memstash.io/values/migration-<< parameters.workflow_id >>) 
 
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
-            then
-              cd ~/project/backend
-              npm install
+            echo $status
+            if [[ "${status}" == 1 ]]; then
               npm run migrations:revert
             fi
 jobs:
@@ -404,7 +402,7 @@ jobs:
             if cat migration-log.txt | grep "has been executed successfully"; then
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
                 --request PUT --data "1" \
-                https://api.memstash.io/values/migration_status_"${CIRCLE_WORKFLOW_ID:0:7}"
+                https://api.memstash.io/values/migration-"${CIRCLE_WORKFLOW_ID:0:7}"
             fi
       - persist_to_workspace:
           root: ~/project
