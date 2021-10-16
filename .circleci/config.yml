@@ -363,22 +363,6 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: prepare environment for backend build
-          command: |
-            cat \<< EOF > backend/.env
-            ENVIRONMENT=production
-            VERSION=1
-            TYPEORM_CONNECTION=postgres
-            TYPEORM_MIGRATIONS_DIR=./src/migrations
-            TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts
-            TYPEORM_MIGRATIONS=./src/migrations/*.ts
-            TYPEORM_HOST=${TYPEORM_HOST}
-            TYPEORM_PORT=${TYPEORM_PORT}
-            TYPEORM_USERNAME=${TYPEORM_USERNAME}
-            TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-            TYPEORM_DATABASE=${TYPEORM_DATABASE}
-            EOF
-      - run:
           name: Install dependencies
           command: |
             sudo apt update
@@ -386,10 +370,21 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            cd backend
+            cd ./backend
             touch .env
-            npm i
-            npm run build
+
+            echo ENVIROMENT=$ENVIROMENT >> ./.env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ./.env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> ./.env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> ./.env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> ./.env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> ./.env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> ./.env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ./.env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ./.env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ./.env
+
+            touch migration-log.txt
             npm run migrations 2>&1 | tee migration-log.txt
       - run:
           name: Send migration results to memstash
@@ -399,10 +394,15 @@ jobs:
               exit 1
             fi
 
-            if cat migration-log.txt | grep "has been executed successfully"; then
+            if cat migration-log.txt | grep "has been executed successfully" ./backend/migration-log.txt
+            then
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
                 --request PUT --data "1" \
                 https://api.memstash.io/values/migration-"${CIRCLE_WORKFLOW_ID:0:7}"
+            else
+              curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+                --request PUT --data "0" \
+                https://api.memstash.io/values/migration_status_${CIRCLE_WORKFLOW_ID}
             fi
       - persist_to_workspace:
           root: ~/project
