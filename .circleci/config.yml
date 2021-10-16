@@ -488,15 +488,18 @@ jobs:
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
-      - image: python:3.7-alpine3.11
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar
-            apk add --update gzip
-            apk add --update curl
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 ansible
+            apk update
+            sudo apt-get purge openssh-server 
+            sudo apt-get install openssh-server
       - run:
           name: Get backend url
           command: |         
@@ -510,7 +513,7 @@ jobs:
 
             echo $BACKEND_URL
             sleep 20
-            curl -v $BACKEND_URL | grep "Welcome"  
+            curl -v "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
       - run:
           name: Frontend smoke test.
           command: |
