@@ -505,13 +505,12 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            BACKEND_URL=$(cat backend-url.txt)
-            BACKEND_URL="http://${BACKEND_URL}:3030/api/status"
+            BACKEND_IP=$(cat backend-url.txt)
+            BACKEND_URL="http://${BACKEND_IP}:3030/api/status"
 
             echo $BACKEND_URL
 
-            curl -s ${BACKEND_URL} | grep "ok"
-                
+            curl -s "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
       - run:
           name: Frontend smoke test.
           command: |
