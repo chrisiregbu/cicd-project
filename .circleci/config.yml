@@ -506,7 +506,7 @@ jobs:
           name: Backend smoke test.
           command: |
             BACKEND_URL=$(cat backend-url.txt)
-            BACKEND_URL="https://${BACKEND_URL}:3030/api/status"
+            BACKEND_URL="http://${BACKEND_URL}:3030/api/status"
 
             echo $BACKEND_URL
 
