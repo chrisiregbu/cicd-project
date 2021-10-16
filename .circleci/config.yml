@@ -319,7 +319,7 @@ jobs:
               --output text)
 
             echo "${BACKEND_IP}" >> .circleci/ansible/inventory.txt
-            
+
             cat .circleci/ansible/inventory.txt
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
@@ -367,16 +367,19 @@ jobs:
       - run:
           name: prepare environment for backend build
           command: |
-            echo ENVIRONMENT=$ENVIRONMENT >> ./.env
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ./.env
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> ./.env
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> ./.env
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> ./.env
-            echo TYPEORM_HOST=$TYPEORM_HOST >> ./.env
-            echo TYPEORM_PORT=$TYPEORM_PORT >> ./.env
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ./.env
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ./.env
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ./.env
+            cat \<< EOF > backend/.env
+            ENVIRONMENT=production
+            VERSION=1
+            TYPEORM_CONNECTION=postgres
+            TYPEORM_MIGRATIONS_DIR=./src/migrations
+            TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts
+            TYPEORM_MIGRATIONS=./src/migrations/*.ts
+            TYPEORM_HOST=${TYPEORM_HOST}
+            TYPEORM_PORT=${TYPEORM_PORT}
+            TYPEORM_USERNAME=${TYPEORM_USERNAME}
+            TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
+            TYPEORM_DATABASE=${TYPEORM_DATABASE}
+            EOF
       - run:
           name: Install dependencies
           command: |
@@ -459,43 +462,21 @@ jobs:
           keys: [backend-build]
       # Attach the "workspace" so that we have access to the previously generated inventory.txt
       - attach_workspace:
-          at: ./
+          at: /tmp/artifacts #./
       - run:
           name: Install dependencies
           command: |
-            pip install awscli
-            apk add --update ansible tar gzip
-            apk add --update zip unzip rsync openssh npm
-            apk add --update curl nodejs-npm
+            apk update
+            apk add --update ansible aws-cli openssh-client tar
+      - run:
+          name: compress backend
+          command: |
+            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
       - run: # Install ansible in the agent that is running this job
           name: Deploy backend
           command: |  
-            cd backend
-            npm install
-            npm run build
-            echo build successful
-            echo ENVIRONMENT=production > "/root/project/backend/dist/.env"
-            echo TYPEORM_CONNECTION=postgres >> "/root/project/backend/dist/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js} >> "/root/project/backend/dist/.env"
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> "/root/project/backend/dist/.env"
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "/root/project/backend/dist/.env"
-            echo NODE_ENV=production >> "/root/project/backend/dist/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "/root/project/backend/dist/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "/root/project/backend/dist/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "/root/project/backend/dist/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "/root/project/backend/dist/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "/root/project/backend/dist/.env"
-
-            tar -czvf backend.tar.gz ./backend
-            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
-            mv backend.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
-            pwd
-            cd /root/project/.circleci/ansible/
-            export ANSIBLE_HOST_KEY_CHECKING=False 
-            export host_key_checking=False
-            export record_host_keys=False
-
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+            cd .circleci/ansible
+            export ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /tmp/artifacts/inventory.txt deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
