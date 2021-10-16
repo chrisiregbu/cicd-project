@@ -510,7 +510,7 @@ jobs:
 
             echo $BACKEND_URL
 
-            curl -s $BACKEND_URL | grep "ok"
+            curl -s ${BACKEND_URL} | grep "ok"
                 
       - run:
           name: Frontend smoke test.
