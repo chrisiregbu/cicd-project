@@ -369,19 +369,16 @@ jobs:
       - run:
           name: prepare environment for backend build
           command: |
-            cat \<< EOF > backend/.env
-            ENVIRONMENT=production
-            VERSION=1
-            TYPEORM_CONNECTION=postgres
-            TYPEORM_MIGRATIONS_DIR=./src/migrations
-            TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts
-            TYPEORM_MIGRATIONS=./src/migrations/*.ts
-            TYPEORM_HOST=${TYPEORM_HOST}
-            TYPEORM_PORT=${TYPEORM_PORT}
-            TYPEORM_USERNAME=${TYPEORM_USERNAME}
-            TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-            TYPEORM_DATABASE=${TYPEORM_DATABASE}
-            EOF
+            echo ENVIRONMENT=$ENVIRONMENT >> ./.env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ./.env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> ./.env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> ./.env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> ./.env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> ./.env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> ./.env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ./.env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ./.env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ./.env
       - run:
           name: Install dependencies
           command: |
@@ -398,7 +395,11 @@ jobs:
 
             status_code="${PIPESTATUS[0]}"
             if [[ ! "${status_code}" == 0 ]]; then
+              echo "Migration successful"
               return 1
+            else
+              echo "Migration unsuccessful"
+              return 0
             fi
       - run:
           name: Send migration results to memstash
@@ -441,14 +442,15 @@ jobs:
             --request GET https://api.memstash.io/values/backendip)
             
             echo $BACKEND_IP
-            
+
             export API_URL="https://${BACKEND_IP}:3030"
+            echo $API_URL
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
             export API_URL=$(cat .circleci/api_url.txt)
-            echo "${API_URL}" > frontend/.env
+            echo $API_URL
             cd frontend
             npm i
             npm run build
@@ -474,10 +476,15 @@ jobs:
           command: |
             apk update
             apk add --update ansible aws-cli openssh-client tar
+      - run:
+          name: compress backend
+          command: |
+            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
       - run: # Install ansible in the agent that is running this job
           name: Deploy backend
           command: |  
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+            cd .circleci/ansible  
+            export ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
