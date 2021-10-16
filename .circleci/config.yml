@@ -494,8 +494,9 @@ jobs:
             sudo apt update
             sudo apt install -y awscli
             sudo apt install -y python3 ansible
-            sudo apt-get purge openssh-server 
-            sudo apt-get install openssh-server
+            sudo iptables -F
+            sudo iptables -P INPUT ACCEPT
+            sudo ufw disable
       - run:
           name: Get backend url
           command: |         
