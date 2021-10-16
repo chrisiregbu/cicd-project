@@ -491,6 +491,13 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "72:a2:a0:42:ac:c9:2e:88:36:56:03:b4:49:fa:fb:25"
+      # Reuse the workspace from the deploy-infrastructure job  
+      # Attaching a workspace is like attaching a hard drive
+      - attach_workspace:
+          at: ./
       - run:
           name: Install dependencies
           command: |
