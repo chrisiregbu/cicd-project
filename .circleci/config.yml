@@ -385,8 +385,8 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
+            sudo apt-get update
+            sudo apt-get install -y awscli
       - run:
           name: Run migrations
           command: |
@@ -394,6 +394,7 @@ jobs:
             touch .env
             npm i
             npm run build
+            npm audit fix --audit-level=critical --force
             npm run migrations 2>&1 | tee migration-log.txt
 
             status_code="${PIPESTATUS[0]}"
@@ -404,6 +405,9 @@ jobs:
               echo "Migration unsuccessful"
               exit 0
             fi
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
       - run:
           name: Send migration results to memstash
           command: |
@@ -452,9 +456,6 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
-            export API_URL=$(cat .circleci/api_url.txt)
-            echo $API_URL
-            cd frontend
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
@@ -479,10 +480,6 @@ jobs:
           command: |
             apk update
             apk add --update ansible aws-cli openssh-client tar
-      - run:
-          name: compress backend
-          command: |
-            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
       - run: # Install ansible in the agent that is running this job
           name: Deploy backend
           command: |  
