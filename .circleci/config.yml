@@ -491,9 +491,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar
-            apk add --update gzip
-            apk add --update curl
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 ansible
             sudo apt-get purge openssh-server 
             sudo apt-get install openssh-server
       - run:
