@@ -536,8 +536,10 @@ jobs:
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"
             if curl -s --head ${URL} | grep "Welcome"
             then
+              echo "Front end not working"
               exit 1
             else
+              echo "Front end working"
               exit 0
             fi 
       - revert-migrations:
