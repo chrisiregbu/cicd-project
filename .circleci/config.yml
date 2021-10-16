@@ -485,18 +485,13 @@ jobs:
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
-      - image: circleci/node:13.8.0
+      - image: alpine:latest # circleci/node:13.8.0
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
-            sudo apt install -y python3 ansible
-            sudo iptables -F
-            sudo iptables -P INPUT ACCEPT
-            sudo ufw disable
+            - run: apk add --update curl
       - run:
           name: Get backend url
           command: |         
@@ -510,12 +505,12 @@ jobs:
 
             echo $BACKEND_URL
             sleep 20
-            curl -v "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
+            curl -v --head "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
       - run:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"
-            if curl -s --head ${URL} | grep "Welcome"
+            if curl -v --head ${URL} | grep "Welcome"
             then
               echo "Front end not working"
               exit 1
