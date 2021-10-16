@@ -300,18 +300,6 @@ jobs:
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople-backend
-
-            export BACKEND_URL=$(aws cloudformation describe-stacks \
-              --stack-name udapeople-backend-"${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query "Stacks[0].Outputs[?OutputKey=='BackendURL'].OutputValue" \
-              --no-paginate --output text)
-
-            echo $BACKEND_URL
-
-            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request PUT --data "${BACKEND_URL}" \
-              https://api.memstash.io/values/backendurl
-
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -336,7 +324,7 @@ jobs:
 
             curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request PUT --data "${BACKEND_IP}" \
-              https://api.memstash.io/values/backendip
+              https://api.memstash.io/values/backendurl
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
       - persist_to_workspace: 
@@ -517,18 +505,12 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query "Reservations[*].Instances[0].PublicIpAddress" \
-              --output text)
-
-            echo $BACKEND_IP
-
             BACKEND_URL=$(cat backend-url.txt)
-            BACKEND_URL="https://${BACKEND_URL}"
+            BACKEND_URL="https://${BACKEND_URL}:3030/api/status"
+
             echo $BACKEND_URL
 
-            curl -s "http://${BACKEND_IP}:3030/api/status" | grep "ok"
+            curl -s $BACKEND_URL" | grep "ok"
                 
       - run:
           name: Frontend smoke test.
