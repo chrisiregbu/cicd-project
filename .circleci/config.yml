@@ -319,6 +319,10 @@ jobs:
             echo "${BACKEND_IP}" >> .circleci/ansible/inventory.txt
 
             cat .circleci/ansible/inventory.txt
+
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request PUT --data "${BACKEND_IP}" \
+              https://api.memstash.io/values/backendip
       # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
       # so that it can be referenced in future jobs.
       - persist_to_workspace: 
@@ -433,18 +437,19 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND_IP=$(cat .circleci/ansible/inventory.txt)
+            export BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+            --request GET https://api.memstash.io/values/backendip)
             
-            echo ${BACKEND_IP}
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo $API_URL
-            echo "${API_URL}" > .circleci/api_url.txt
+            echo $BACKEND_IP
+            
+            export API_URL="https://${BACKEND_IP}:3030"
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
             export API_URL=$(cat .circleci/api_url.txt)
             echo "${API_URL}" > frontend/.env
+            cd frontend
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
@@ -463,7 +468,7 @@ jobs:
           keys: [backend-build]
       # Attach the "workspace" so that we have access to the previously generated inventory.txt
       - attach_workspace:
-          at: /tmp/artifacts #./
+          at: ./
       - run:
           name: Install dependencies
           command: |
