@@ -366,6 +366,11 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install -y awscli
+      - run:
           name: Run migrations
           command: |
             cd backend
