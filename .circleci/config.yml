@@ -199,8 +199,8 @@ jobs:
           name: backend test 
           command: |
             cd backend
-            npm run test
-
+            sudo npm i
+            sudo npm run test
       # In the event test-backend has failed, alert UdaPeople
       - slack/notify:
           template: basic_fail_1
