@@ -497,42 +497,39 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
-            pip3 install awscli
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 ansible
       - run:
           name: Get backend url
           command: |         
-            BACKEND_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
-            --request GET https://api.memstash.io/values/backend_dns)
-
-            echo ${BACKEND_DNS}
+            curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request GET https://api.memstash.io/values/backendurl > backend-url.txt
       - run:
           name: Backend smoke test.
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query "Reservations[*].Instances[*].PublicIpAddress" \
+              --query "Reservations[*].Instances[0].PublicIpAddress" \
               --output text)
 
-            echo "${BACKEND_IP}"
+            echo $BACKEND_IP
 
-            curl -s "http://${BACKEND_IP}:3030/api/status" | grep "ok"
+            BACKEND_URL=$(cat backend-url.txt)
+            BACKEND_URL="https://${BACKEND_URL}:3030/api/status"
+            echo $BACKEND_URL
+
+            curl -s "http://${BACKEND_URL}:3030/api/status" | grep "ok"
                 
       - run:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"
-            
             if curl -s --head ${URL} | grep "Welcome"
             then
-              echo "Successful Smoke-test"
-              exit 0
-            else
-              echo "Unsuccessful Smoke-test"
               exit 1
+            else
+              exit 0
             fi 
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
