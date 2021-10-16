@@ -404,7 +404,7 @@ jobs:
               echo "Sending migration results to memstash"
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
                 --request PUT --data "1" \
-                https://api.memstash.io/values/migration-"${CIRCLE_WORKFLOW_ID}"
+                https://api.memstash.io/values/migration-"${CIRCLE_WORKFLOW_ID:0:7}"
             else
               echo "Could not send migration results to memstash"
             fi
