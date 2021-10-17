@@ -495,6 +495,7 @@ jobs:
             sudo apt update
             sudo apt install -y awscli
             sudo apt install -y python3 ansible
+            apk add --update curl
       - run:
           name: Get backend url
           command: |         
@@ -508,17 +509,22 @@ jobs:
 
             echo $BACKEND_URL
             sleep 20
-            curl -v "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
+            if curl -v --head ${BACKEND_URL} | grep "ok" 
+            then
+              echo "Backend working"
+            else
+              echo "Backend not working"
+            fi
       - run:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"
             if curl -v --head ${URL} | grep "Welcome"
             then
-              echo "Front end not working"
+              echo "Website does not exist"
               exit 1
             else
-              echo "Front end working"
+              echo "Website exists"
               exit 0
             fi 
       # - revert-migrations:
