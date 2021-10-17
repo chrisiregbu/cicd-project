@@ -20,8 +20,8 @@ commands:
           # ${CIRCLE_WORKFLOW_ID:0:7} takes the first 7 chars of the variable CIRCLE_CI_WORKFLOW_ID 
           when: on_fail
           command: |
-            if aws s3 ls | grep udapeople-<< parameters.workflow_id >>; then
-              aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
+            if aws s3 ls | grep udapeople-kk1j963dhjppmz159-<< parameters.workflow_id >>; then
+              aws s3 rm s3://udapeople-kk1j963dhjppmz159-<< parameters.workflow_id >> --recursive
             fi
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
@@ -343,7 +343,7 @@ jobs:
       # Add the SSH key fingerprint to job so that Ansible will have access to the EC2 instance via SSH.
       - add_ssh_keys:
           fingerprints:
-            - "db:33:0f:6a:7a:e1:aa:62:58:87:eb:55:8f:81:33:3e"
+            - "ef:69:64:e9:df:d5:5c:23:6f:ba:09:88:ef:ba:39:89"
       # Reuse the workspace from the deploy-infrastructure job  
       # Attaching a workspace is like attaching a hard drive
       - attach_workspace:
@@ -453,7 +453,7 @@ jobs:
             cd frontend
             npm i
             npm run build
-            aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
+            aws s3 cp ./dist s3://udapeople-kk1j963dhjppmz159-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -464,7 +464,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "db:33:0f:6a:7a:e1:aa:62:58:87:eb:55:8f:81:33:3e"
+            - "ef:69:64:e9:df:d5:5c:23:6f:ba:09:88:ef:ba:39:89"
       - restore_cache:
           keys: [backend-build]
       # Attach the "workspace" so that we have access to the previously generated inventory.txt
@@ -541,7 +541,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name udapeople-blue \
-              --region eu-west-2 \
+              --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
               
@@ -615,7 +615,7 @@ jobs:
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               echo "Deleting old stacks"
-              aws s3 rm s3://udapeople-"${OldWorkflowID}" --recursive
+              aws s3 rm s3://udapeople-kk1j963dhjppmz159-"${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name udapeople-backend-"${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name udapeople-frontend-"${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name udapeople-cloudfront
@@ -650,8 +650,8 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update: 
-      #     requires: [smoke-test]
+      - cloudfront-update: 
+          requires: [smoke-test]
       # - install-node-exporter:
       #     requires: [cloudfront-update]
       # - cleanup:
