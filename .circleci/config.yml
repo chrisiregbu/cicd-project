@@ -485,15 +485,15 @@ jobs:
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
-      - image: alpine:latest # circleci/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apt update
-            apt install -y awscli
-            apt install -y python3 ansible
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 ansible
       - run:
           name: Get backend url
           command: |         
@@ -520,10 +520,10 @@ jobs:
               echo "Front end working"
               exit 0
             fi 
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy-environment:  
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      # - revert-migrations:
+      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      # - destroy-environment:  
+      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
@@ -650,9 +650,9 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update: 
-          requires: [smoke-test]
-      - install-node-exporter:
-          requires: [cloudfront-update]
-      - cleanup:
-          requires: [cloudfront-update]
+      # - cloudfront-update: 
+      #     requires: [smoke-test]
+      # - install-node-exporter:
+      #     requires: [cloudfront-update]
+      # - cleanup:
+      #     requires: [cloudfront-update]
