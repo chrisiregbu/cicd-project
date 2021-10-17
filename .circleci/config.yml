@@ -114,7 +114,7 @@ jobs:
       - run:
           name: prepare environment for backend build
           command: |
-            cat \<< EOF > ./backend/.env
+            cat \<< EOF > backend/.env
             ENVIRONMENT=production
             VERSION=1
             TYPEORM_CONNECTION=postgres
