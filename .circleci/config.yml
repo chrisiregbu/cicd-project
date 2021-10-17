@@ -491,9 +491,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
-            sudo apt install -y python3 ansible
+            apt update
+            apt install -y awscli
+            apt install -y python3 ansible
       - run:
           name: Get backend url
           command: |         
