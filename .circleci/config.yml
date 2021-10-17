@@ -491,7 +491,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            - run: apk add --update curl
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 ansible
       - run:
           name: Get backend url
           command: |         
@@ -505,7 +507,7 @@ jobs:
 
             echo $BACKEND_URL
             sleep 20
-            curl -v --head "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
+            curl -v "http://${BACKEND_IP}:3030/api/status" | grep "ok"  
       - run:
           name: Frontend smoke test.
           command: |
