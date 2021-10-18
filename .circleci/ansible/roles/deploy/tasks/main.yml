@@ -1,18 +1,34 @@
 ---
-- name: copy dist backend folder to ec2 server
-  become: yes
-  copy:
-    src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu/artifact.tar.gz
-
-- name: prepare binaries
+- name: Copy files from backend
   become: true
-  shell: |
-    cd /home/ubuntu
-    tar xvzf artifact.tar.gz -C .
+  copy:
+    src: /home/backend.tar.gz
+    dest: /home/ubuntu/backend.tar.gz
 
+- name: "Install dependencies."
+  become: true
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "Install pm2"
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+    
 - name: Start PM2 server
   become: true  
   shell: |
     cd /home/ubuntu
+    tar xzvf backend.tar.gz
+    mv home/circleci/project/backend .
+    cd backend
+    npm install -g npm@latest
+    npm install -g webpack-dev-server
+    npm install
+    npm run build
     pm2 start npm --name backend -- start
