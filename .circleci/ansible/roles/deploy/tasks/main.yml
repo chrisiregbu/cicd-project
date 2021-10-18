@@ -22,7 +22,7 @@
 - name: "Move backend folder to /home/ubuntu"
   become: true
   copy:
-    src: ../../backend
+    src: ./././backend
     dest: /home/ubuntu
     remote_src: yes
     mode: '0777'
