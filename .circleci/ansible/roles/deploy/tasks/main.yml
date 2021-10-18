@@ -14,6 +14,19 @@
     production: yes
     state: present
 
+- name: Copy backend to remote
+  become: true  
+  shell: |
+    cd /home/ubuntu
+
+- name: "move backend folder to /home/ubuntu"
+  become: true
+  copy:
+    src: ./backend
+    dest: /home/ubuntu
+    remote_src: no
+    mode: '0777'
+
 - name: Start PM2 server
   become: true  
   shell: |
