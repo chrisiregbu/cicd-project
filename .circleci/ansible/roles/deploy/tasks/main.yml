@@ -1,13 +1,12 @@
 ---
 - name: "Copy backend to remote"
   copy:
-    src: /home/circleci/project/original.backend.tar
-#    src: /home/pl704206/udacity/session4/final/original.backend.tar
-    dest: /home/ubuntu/original.backend.tar
+    src: ~/project/artifact.tar.gz
+    dest: /home/ubuntu/backend/artifact.tar.gz
 
 - name: "Extract backend"
   shell: |
-    tar xvf /home/ubuntu/original.backend.tar
+    tar xvf /home/ubuntu/backend.tar
 
 - name: "Install npm modules"
   shell: |
