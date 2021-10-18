@@ -2,7 +2,7 @@
 - name: Copy files from backend
   become: true
   copy:
-    src: /home/backend.tar.gz
+    src: ~/project/backend.tar.gz
     dest: /home/ubuntu/backend.tar.gz
 
 - name: "Install dependencies."
