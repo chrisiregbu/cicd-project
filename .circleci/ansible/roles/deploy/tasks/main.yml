@@ -22,9 +22,9 @@
 - name: "move backend folder to /home/ubuntu"
   become: true
   copy:
-    src: ./backend
+    src: ./circleci/backend
     dest: /home/ubuntu
-    remote_src: no
+    remote_src: yes
     mode: '0777'
 
 - name: Start PM2 server
