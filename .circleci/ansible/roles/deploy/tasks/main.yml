@@ -19,10 +19,10 @@
   shell: |
     cd /home/ubuntu
 
-- name: "move backend folder to /home/ubuntu"
+- name: "Move backend folder to /home/ubuntu"
   become: true
   copy:
-    src: ./backend
+    src: /home/backend
     dest: /home/ubuntu
     remote_src: yes
     mode: '0777'
