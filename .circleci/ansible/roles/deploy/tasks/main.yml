@@ -1,34 +1,34 @@
 ---
-- name: Copy files from backend
-  become: true
+- name: "Copy backend to remote"
   copy:
-    src: ~/project/backend.tar.gz
-    dest: /home/ubuntu/backend.tar.gz
+    src: /home/circleci/project/original.backend.tar
+#    src: /home/pl704206/udacity/session4/final/original.backend.tar
+    dest: /home/ubuntu/original.backend.tar
 
-- name: "Install dependencies."
-  become: true
-  apt:
-    name: ["nodejs", "npm"]
-    state: latest
-    update_cache: yes
-
-- name: "Install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
-    
-- name: Start PM2 server
-  become: true  
+- name: "Extract backend"
   shell: |
-    cd /home/ubuntu
-    tar xzvf backend.tar.gz
-    mv home/circleci/project/backend .
+    tar xvf /home/ubuntu/original.backend.tar
+
+- name: "Install npm modules"
+  shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
     cd backend
-    npm install -g npm@latest
-    npm install -g webpack-dev-server
-    npm install
+    npm i
+
+- name: "Build backend"
+  shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    cd backend
     npm run build
-    pm2 start npm --name backend -- start
+
+- name: "Run backend"
+  shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    cd backend/dist
+    pm2 start main.js
