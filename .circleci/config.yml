@@ -662,5 +662,5 @@ workflows:
           requires: [smoke-test]
       # - install-node-exporter:
       #     requires: [cloudfront-update]
-      - cleanup:
-          requires: [cloudfront-update]
+      # - cleanup:
+      #     requires: [cloudfront-update]
