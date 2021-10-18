@@ -415,10 +415,12 @@ jobs:
             else
               echo "Failed to send migration results to memstash"
             fi
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - backend
+      - run:
+          name: Install aws-cli
+          when: on_fail
+          command: |
+            sudo apt-get update
+            sudo apt-get install awscli
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
@@ -495,7 +497,6 @@ jobs:
             sudo apt update
             sudo apt install -y awscli
             sudo apt install -y python3 ansible
-            apk add --update curl
       - run:
           name: Get backend url
           command: |         
@@ -527,10 +528,10 @@ jobs:
               echo "Website exists"
               exit 0
             fi 
-      # - revert-migrations:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      # - destroy-environment:  
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:  
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
