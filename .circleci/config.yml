@@ -370,14 +370,14 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
+            apt update
+            apt install -y awscli
       - run:
           name: Run migrations
           command: |
             cd backend
-            sudo npm install
-            sudo npm run migrations 2>&1 | tee migration-dump.txt
+            npm install
+            npm run migrations 2>&1 | tee migration-dump.txt
 
             status_code="${PIPESTATUS[0]}"
             if [[ ! "${status_code}" == 0 ]]; then
@@ -390,20 +390,12 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            if cat migration-log.txt | grep "has been executed successfully"; then
-              echo "Sending migration results to memstash"
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
               curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
                 --request PUT --data "1" \
-                https://api.memstash.io/values/migration-"${CIRCLE_WORKFLOW_ID:0:7}"
-            else
-              echo "Failed to send migration results to memstash"
+                https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
-      - run:
-          name: Install aws-cli
-          when: on_fail
-          command: |
-            sudo apt-get update
-            sudo apt-get install awscli
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
@@ -437,7 +429,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
-            npm i
+            npm install
             npm run build
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       - destroy-environment:
