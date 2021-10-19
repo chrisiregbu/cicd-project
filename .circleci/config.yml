@@ -285,7 +285,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople-backend
+              --tags project=udapeople
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -293,7 +293,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople-frontend
+              --tags project=udapeople
 
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end IP to ansible inventory
@@ -311,8 +311,7 @@ jobs:
             curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request PUT --data "${BACKEND_IP}" \
               https://api.memstash.io/values/backendurl
-      # Save workspace block for subsequent jobs (i.e. configure-infrastructure) so that it gets saved to the workspace
-      # so that it can be referenced in future jobs.
+      # Save the modified inventory file workspace so that it can be used in future jobs
       - persist_to_workspace: 
           root: ./
           paths: 
@@ -626,11 +625,11 @@ workflows:
           requires: [build-backend]
       - scan-frontend: 
           requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #     filters:
-      #       branches:
-      #         only: [master]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       # - run-migrations:
