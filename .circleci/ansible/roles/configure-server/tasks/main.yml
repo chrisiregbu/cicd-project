@@ -12,19 +12,17 @@
     name: nvm
     global: yes
 
-- name: "install pm2"
+- name: "Install pm2"
   become: yes
   npm:
     name: pm2
     global: yes
     production: yes
     state: present
-
-- name: remove dependencies that are no longer required
-  become: yes
-  apt:
-    autoremove: yes
-
-- name: install nodejs v13.8.0
-  become: yes
-  command: node 13.8.0
+    
+- name: Start PM2 server
+  become: true  
+  shell: |
+    npm install
+    pm2 stop default
+    pm2 start npm -- start
