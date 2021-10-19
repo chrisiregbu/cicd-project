@@ -115,8 +115,10 @@ jobs:
           name: Back-end build
           command: |
             cd backend
+            npm cache clean --force
+            rm -rf node_modules
+            rm -rf package-lock.json
             npm install
-            npm audit fix
             npm run build
       - save_cache:
           paths: [backend/node_modules]
