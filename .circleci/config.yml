@@ -385,14 +385,14 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt update
-            apt install -y awscli
+            sudo apt update
+            sudo apt install -y awscli
       - run:
           name: Run migrations
           command: |
             cd backend
-            npm install
-            npm run migrations 2>&1 | tee migration-dump.txt
+            sudo npm install
+            sudo npm run migrations 2>&1 | tee migration-dump.txt
 
             status_code="${PIPESTATUS[0]}"
             if [[ ! "${status_code}" == 0 ]]; then
