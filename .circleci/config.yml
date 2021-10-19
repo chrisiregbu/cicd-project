@@ -217,8 +217,8 @@ jobs:
           command: |
             cd frontend
             npm install
+            npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical
-
       # In the event test-frontend has failed, alert the engineering team
       - slack/notify:
           template: basic_fail_1
@@ -250,8 +250,8 @@ jobs:
           command: |
             cd backend
             npm install
+            npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical
-
       # In the event scan-backend has failed, alert the engineering team
       - slack/notify:
           template: basic_fail_1
