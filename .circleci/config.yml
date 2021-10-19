@@ -372,6 +372,8 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install awscli
+            npm audit fix --audit-level=critical --force
+            npm audit fix --audit-level=critical
       - run:
           name: Run migrations
           command: |
