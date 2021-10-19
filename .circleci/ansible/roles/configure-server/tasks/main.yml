@@ -27,4 +27,4 @@
 
 - name: install nodejs v13.8.0
   become: yes
-  command: n 13.8.0
+  command: node 13.8.0
