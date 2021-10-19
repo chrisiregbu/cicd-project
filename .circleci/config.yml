@@ -385,16 +385,14 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
+            apt update
+            apt install -y awscli
       - run:
           name: Run migrations
           command: |
-            cd ./backend
-            touch .env
-            npm i
-            npm run build
-            npm run migrations 2>&1 | tee migration-log.txt
+            cd backend
+            npm install
+            npm run migrations 2>&1 | tee migration-dump.txt
 
             status_code="${PIPESTATUS[0]}"
             if [[ ! "${status_code}" == 0 ]]; then
@@ -480,7 +478,15 @@ jobs:
             apk add --update ansible aws-cli openssh-client tar
       - run: # Install ansible in the agent that is running this job
           name: Deploy backend
-          command: |   
+          command: |  
+            cd backend
+            npm i
+            npm run build
+            cd .. 
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -506,15 +512,14 @@ jobs:
           name: Backend smoke test.
           command: |
             BACKEND_IP=$(cat backend-url.txt)
-            BACKEND_URL="http://${BACKEND_IP}:3030/api/status"
 
-            echo $BACKEND_URL
-            sleep 20
-            if curl -v --head ${BACKEND_URL} | grep "ok" 
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
             then
-              echo "Backend working"
+                return 0
             else
-              echo "Backend not working"
+                return 1
             fi
       - run:
           name: Frontend smoke test.
