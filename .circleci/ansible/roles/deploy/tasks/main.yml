@@ -1,12 +1,15 @@
 ---
 - name: "Copy backend to remote"
   copy:
-    src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu/backend/artifact.tar.gz
+    src: /home/backend.tar.gz
+    dest: /home/ubuntu/backend.tar.gz
 
 - name: "Extract backend"
   shell: |
-    tar xvf /home/ubuntu/backend.tar
+    cd /home/ubuntu/
+    tar xzvf backend.tar.gz
+    mv home/circleci/project/backend .
+    cd backend
 
 - name: "Install npm modules"
   shell: |
@@ -31,3 +34,8 @@
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
     cd backend/dist
     pm2 start main.js
+    sudo npm install -g npm@latest
+    sudo npm install -g webpack-dev-server
+    sudo npm install
+    sudo npm run build
+    sudo pm2 start npm --name backend -- start
