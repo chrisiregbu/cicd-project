@@ -37,7 +37,7 @@ commands:
           when: on_fail
           command: |
             status=$(curl -H "token: << parameters.workflow_id >>" \
-            --request GET https://api.memstash.io/values/migration-<< parameters.workflow_id >>) 
+            --request GET https://api.memstash.io/values/migration_<< parameters.workflow_id >>) 
 
             echo $status
             if [[ "${status}" == 1 ]]; then
@@ -368,17 +368,12 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
       - run:
-          name: Install dependencies
-          command: |
-            sudo apt-get update
-            sudo apt-get install awscli
-      - run:
           name: Run migrations
           command: |
             cd backend
             npm install
             npm audit fix --audit-level=critical
-            npm run migrations 2>&1 | tee migration-dump.txt
+            npm run migrations 2>&1 | tee migration_dump.txt
 
             status_code="${PIPESTATUS[0]}"
             if [[ ! "${status_code}" == 0 ]]; then
@@ -397,6 +392,11 @@ jobs:
                 --request PUT --data "1" \
                 https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install awscli
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:
