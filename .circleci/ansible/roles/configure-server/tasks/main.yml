@@ -16,6 +16,7 @@
     autoremove: yes
 
 - name: "install dependencies."
+  become: true
   apt:
     name: ["nodejs", "npm"]
     state: latest
