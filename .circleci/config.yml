@@ -404,6 +404,7 @@ jobs:
               echo "Migration unsuccessful"
               exit 1
             fi
+            cat migration_dump.txt
       - run:
           name: Send migration results to memstash
           command: |
@@ -436,19 +437,26 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
-            --request GET https://api.memstash.io/values/backendip)
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --region ${AWS_DEFAULT_REGION} \
+              --filters 'Name=tag:project,Values=udapeople-backend' \
+              --query 'Reservations[*].Instances[0].PublicIpAddress' \
+              --output text)
             
             echo $BACKEND_IP
 
             export API_URL="https://${BACKEND_IP}:3030"
-            echo $API_URL
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
             npm install
             npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -475,7 +483,14 @@ jobs:
           name: Deploy backend
           command: |  
             cd backend
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -644,10 +659,10 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update: 
