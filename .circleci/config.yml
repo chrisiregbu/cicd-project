@@ -372,13 +372,12 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install awscli
-            npm audit fix --audit-level=critical --force
-            npm audit fix --audit-level=critical
       - run:
           name: Run migrations
           command: |
             cd backend
             npm install
+            npm audit fix --audit-level=critical
             npm run migrations 2>&1 | tee migration-dump.txt
 
             status_code="${PIPESTATUS[0]}"
