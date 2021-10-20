@@ -1,4 +1,14 @@
 ---
+- name: "install python for Ansible."
+  become: yes
+  apt:
+    name: python3
+    state: latest
+    
+- name: install nodejs v13.8.0
+  become: yes
+  command: n 13.8.0
+
 - name: "install npm"
   become: yes
   apt:
@@ -19,7 +29,7 @@
     global: yes
     production: yes
     state: present
-    
+
 - name: Start PM2 server
   become: true  
   shell: |
