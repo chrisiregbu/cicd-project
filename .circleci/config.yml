@@ -372,7 +372,6 @@ jobs:
           command: |
             cd backend
             npm install
-            npm audit fix --audit-level=critical
             npm run migrations 2>&1 | tee migration_dump.txt
 
             status_code="${PIPESTATUS[0]}"
