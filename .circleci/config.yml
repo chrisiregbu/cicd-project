@@ -357,17 +357,18 @@ jobs:
           name: prepare environment for backend build
           command: |
             echo "Preparing environment for backend build"
-            ENVIRONMENT: production
-            TYPEORM_CONNECTION: postgres 
-            TYPEORM_ENTITIES: "./src/modules/domain/**/*.entity{.ts, .js}"
-            TYPEORM_MIGRATIONS: "./src/migrations/*.ts"
-            TYPEORM_MIGRATIONS_DIR: "./src/migrations"
-            NODE_ENV: production 
-            TYPEORM_HOST: ${TYPEORM_HOST}
-            TYPEORM_PORT: 5432 
-            TYPEORM_USERNAME: ${TYPEORM_USERNAME}
-            TYPEORM_PASSWORD: ${TYPEORM_PASSWORD} 
-            TYPEORM_DATABASE: ${TYPEORM_DATABASE} 
+            environment:
+              ENVIRONMENT: production
+              TYPEORM_CONNECTION: postgres 
+              TYPEORM_ENTITIES: "./src/modules/domain/**/*.entity{.ts, .js}"
+              TYPEORM_MIGRATIONS: "./src/migrations/*.ts"
+              TYPEORM_MIGRATIONS_DIR: "./src/migrations"
+              NODE_ENV: production 
+              TYPEORM_HOST: ${TYPEORM_HOST}
+              TYPEORM_PORT: 5432 
+              TYPEORM_USERNAME: ${TYPEORM_USERNAME}
+              TYPEORM_PASSWORD: ${TYPEORM_PASSWORD} 
+              TYPEORM_DATABASE: ${TYPEORM_DATABASE} 
       - run:
           name: Run migrations
           command: |
