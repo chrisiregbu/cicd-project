@@ -4,17 +4,12 @@
   apt:
     name: python3
     state: latest
-    
-- name: install nodejs v13.8.0
-  become: yes
-  command: n 13.8.0
 
-- name: "install npm"
-  become: yes
+- name: "install dependencies."
   apt:
-    name: npm
-    update_cache: yes
+    name: ["nodejs", "npm"]
     state: latest
+    update_cache: yes
 
 - name: Install nvm
   become: yes
