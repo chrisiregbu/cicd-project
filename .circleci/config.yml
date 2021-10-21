@@ -477,11 +477,19 @@ jobs:
           command: |
             apk update
             apk add --update ansible aws-cli openssh-client tar
+      - run:
+          name: compress backend
+          command: |
+            tar -C /tmp/artifacts/backend -czvf artifact.tar.gz .
+            
+            mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+            git clone -b develop $CIRCLE_REPOSITORY_URL 
+            cd $CIRCLE_PROJECT_REPONAME
       - run: # Install ansible in the agent that is running this job
           name: Deploy backend
           command: |  
             cd backend
-            
+
             cd ..
             tar -C backend -czvf artifact.tar.gz .
             cd .circleci/ansible
