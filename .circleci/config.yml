@@ -477,10 +477,6 @@ jobs:
           command: |
             apk update
             apk add --update ansible aws-cli openssh-client tar
-  
-            mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-            git clone -b develop $CIRCLE_REPOSITORY_URL 
-            cd $CIRCLE_PROJECT_REPONAME
       - run: # Install ansible in the agent that is running this job
           name: Deploy backend
           command: |  
