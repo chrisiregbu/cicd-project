@@ -167,7 +167,7 @@ jobs:
           name: frontend test
           command: |
             cd frontend 
-            npm i
+            npm install
             npm run test
       # In the event test-frontend has failed, alert UdaPeople
       - slack/notify:
