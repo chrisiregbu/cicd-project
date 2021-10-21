@@ -400,7 +400,7 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            cdd ./backend
+            cd ./backend
             touch .env
             npm i
             npm run build
