@@ -79,8 +79,8 @@ jobs:
           command: |
             cd frontend
             echo $CODE
-            npm install
-            npm run build
+            sudo npm i
+            sudo npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -454,8 +454,10 @@ jobs:
       - run:
           name: Deploy frontend objects
           command: |
+            export API_URL=$(cat .circleci/api_url.txt)
+            echo "${API_URL}" > frontend/.env
             cd frontend
-            npm install
+            npm i
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp ./dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
