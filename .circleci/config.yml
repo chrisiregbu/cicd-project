@@ -511,7 +511,6 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            BACKEND_IP=$(cat backend-url.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
@@ -524,13 +523,14 @@ jobs:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/#/employees"
-            if curl -v --head ${URL} | grep "Welcome"
+            echo ${URL}
+            if curl -s --head ${URL} | grep "Welcome"
             then
-              echo "Website does not exist"
+              echo "Website exists"
               exit 1
             else
-              echo "Website exists"
-              exit 0
+              echo "Website does not exists"
+              exit 1
             fi 
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -660,8 +660,8 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update: 
       #     requires: [smoke-test]
       # - install-node-exporter:
