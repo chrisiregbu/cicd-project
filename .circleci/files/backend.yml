@@ -35,7 +35,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub backend-${ID}
-  Outputs:
-    BackendURL:
-      Description: host public dns for the created instance
-      Value: !Join [ "", [ 'http://', !GetAtt EC2Instance.PublicDnsName, ':3030/api/status' ]]
+Outputs:
+  BackendURL:
+    Description: host public dns for the created instance
+    Value: !Join [ "", [ 'http://', !GetAtt EC2Instance.PublicDnsName, ':3030/api/status' ]]
