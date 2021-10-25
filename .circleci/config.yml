@@ -504,10 +504,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
-            sudo apt install -y python3 ansible
-            yum -y install -y curl
+            sudo apt install curl
       - run:
           name: Get backend url
           command: |         
