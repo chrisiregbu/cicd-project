@@ -450,11 +450,6 @@ jobs:
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-
-            echo API_URL=$API_URL >> "frontend/.env"
-            echo ENVIRONMENT=production  >> "frontend/.env" 
-            echo NODE_ENV=production >> "frontend/.env"
-            cat "frontend/.env"
       - run:
           name: Deploy frontend objects
           command: |
@@ -534,13 +529,13 @@ jobs:
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"  
             echo ${URL}
-            if curl -v --head ${URL} | grep "Welcome"
+            if curl -s ${URL} | grep "Welcome"
             then
               echo "Frontend OK"
-              exit 0
+              return 0
             else
               echo "Frontend Fail"
-              exit 1
+              return 1
             fi 
       # - revert-migrations:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
