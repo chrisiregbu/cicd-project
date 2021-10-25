@@ -507,6 +507,7 @@ jobs:
             sudo apt update
             sudo apt install -y awscli
             sudo apt install -y python3 ansible
+            sudo yum -y install -y curl
       - run:
           name: Get backend url
           command: |         
@@ -532,15 +533,15 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
               echo "Frontend OK"
-              return 0
+              exit 0
             else
-              echo "Frontend Fail"
-              return 1
+              echo "Frontend failed"
+              exit 1
             fi 
-      # - revert-migrations:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      # - destroy-environment:  
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:  
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
