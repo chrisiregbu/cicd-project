@@ -435,9 +435,10 @@ jobs:
             yum -y install tar 
             yum -y install gzip
             curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
+            yum -y install curl
             yum -y install nodejs
       - attach_workspace:
-          at: ./
+          at: ./frontend
       - run:
           name: Get backend url
           command: |
@@ -449,6 +450,11 @@ jobs:
 
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
+
+            echo API_URL=$API_URL >> "frontend/.env"
+            echo ENVIRONMENT=production  >> "frontend/.env" 
+            echo NODE_ENV=production >> "frontend/.env"
+            cat "frontend/.env"
       - run:
           name: Deploy frontend objects
           command: |
@@ -525,7 +531,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"  
             echo ${URL}
             if curl -s ${URL} | grep "Welcome"
             then
