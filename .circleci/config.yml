@@ -394,6 +394,8 @@ jobs:
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
                 --request PUT --data "1" \
                 https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+
+                echo "Successfully sent migration results to memstash."
               fi
             fi
       - persist_to_workspace:
@@ -489,9 +491,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install -y awscli
-            sudo apt install -y python3 ansible
+            apk add --no-cache curl
+            apk add --no-cache --upgrade bash
+            apk add --no-cache --update ansible
+            apk add --no-cache openssh-client
       - run:
           name: Get backend url
           command: |         
@@ -516,16 +519,16 @@ jobs:
             echo ${URL}
             if curl -s ${URL} | grep "Welcome"
             then
-              echo "Frontend OK"
+              echo "Frontend smoke test successful."
               exit 0
             else
-              echo "Frontend failed"
+              echo "Frontend smoke test unsuccessful"
               exit 1
             fi 
-      # - revert-migrations:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      # - destroy-environment:  
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:  
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
