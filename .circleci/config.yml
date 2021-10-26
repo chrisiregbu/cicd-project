@@ -485,16 +485,14 @@ jobs:
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
-      - image: circleci/node:13.8.0
+      - image:  python:3.7-alpine3.11  #circleci/node:13.8.0
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apt add --no-cache curl
-            apt add --no-cache --upgrade bash
-            apt add --no-cache --update ansible
-            apt add --no-cache openssh-client
+            apk add --update curl nodejs npm
+            pip install awscli
       - run:
           name: Get backend url
           command: |         
