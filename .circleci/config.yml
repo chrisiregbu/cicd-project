@@ -313,19 +313,6 @@ jobs:
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople-frontend
-            
-            export FRONTEND_URL=$(aws ec2 describe-instances  \
-              --region "${AWS_DEFAULT_REGION}"  \
-              --filters 'Name=tag:project,Values=udapeople-frontend' \
-              --query "Reservations[*].Instances[0].PublicDnsName"  \
-              --output text) 
-
-            echo ${FRONTEND_URL}
-            
-            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request PUT --data "${FRONTEND_URL}" \
-                https://api.memstash.io/values/frontendurl
-
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end IP to ansible inventory
           command: |
@@ -434,6 +421,8 @@ jobs:
             yum -y install curl
             curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
             yum -y install nodejs
+            cd frontend 
+            npm install
       - attach_workspace:
           at: ./
       - run:
@@ -531,12 +520,8 @@ jobs:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"  
+            
             echo ${URL}
-
-            curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request GET https://api.memstash.io/values/frontendurl > frontend-url.txt
-
-            export FRONTEND_URL=$(cat frontend-url.txt)
 
             if curl -s ${URL} | grep "Welcome"
             then
