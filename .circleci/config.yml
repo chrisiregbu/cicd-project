@@ -491,8 +491,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl nodejs npm
-            pip install awscli
+            apk add --no-cache curl
+            apk add --no-cache --upgrade bash
+            apk add --no-cache --update ansible
+            apk add --no-cache openssh-client
+            pip3 install awscli
       - run:
           name: Get backend url
           command: |         
@@ -513,7 +516,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com#employees"  
             echo ${URL}
             if curl -s ${URL} | grep "Welcome"
             then
