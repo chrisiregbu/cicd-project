@@ -434,6 +434,7 @@ jobs:
           command: |
             yum -y install tar 
             yum -y install gzip
+            yum -y install curl
             curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
             yum -y install nodejs
       - attach_workspace:
