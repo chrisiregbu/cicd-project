@@ -390,7 +390,7 @@ jobs:
             npm run build
             if [ $? -eq 0 ]; then echo "install success"; fi
             npm run build
-            cat.env
+            touch.env
             npm run migrations > migration_dump.txt
             cat migration_dump.txt
       - run:
