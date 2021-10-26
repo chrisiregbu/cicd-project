@@ -491,10 +491,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
+            apt add --no-cache curl
+            apt add --no-cache --upgrade bash
+            apt add --no-cache --update ansible
+            apt add --no-cache openssh-client
       - run:
           name: Get backend url
           command: |         
