@@ -5,16 +5,29 @@
     src: ~/project/artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
 
-- name: prepare binaries
+- name: "Install Ansible dependencies"
   become: true
-  shell: |
-    cd /home/ubuntu
-    tar xvzf artifact.tar.gz -C .
+  apt:
+    name: ["nodejs", "npm", "python3", "tar", "gzip", "git"]
+    state: latest
+    update_cache: yes
+
+- name: "Create directory for backend"
+  file:
+    path: /home/ubuntu/backend/
+    state: directory
+
+- name: "Copy backend files"
+  become: yes
+  synchronize:
+    src: ../../backend
+    dest: /home/ubuntu
+    recursive: true
 
 - name: start server
   become: true
   shell: |
-    cd /home/ubuntu
+    cd /home/ubuntu/backend
     npm install 
     pm2 stop default
     pm2 start npm --name backend -- start
