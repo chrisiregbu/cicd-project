@@ -304,7 +304,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople-backend
+              --tags project=udapeople
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -312,7 +312,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople-frontend
+              --tags project=udapeople
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end IP to ansible inventory
           command: |
@@ -438,11 +438,10 @@ jobs:
           command: |
             export API_URL=$(cat .circleci/api_url.txt)
             echo "${API_URL}" > frontend/.env
-            cd frontend
+            cd frontend/dist/
             npm install
             npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws s3 sync . s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --acl public-read --delete
+            aws s3 cp . s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -512,11 +511,11 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/index.html"  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/index.html"  
             
             echo ${URL}
 
-            if curl -s ${URL} | grep "Welcome"
+            if curl -v ${URL} | grep "Welcome"
             then
               echo "Frontend smoke test successful."
               exit 0
