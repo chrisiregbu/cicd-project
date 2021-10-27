@@ -512,11 +512,16 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees"  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com"  
             
             echo ${URL}
 
-            curl -s ${URL} | grep "Welcome"
+            if curl "${URL}/#/employees" | grep "ok"
+            then
+              echo "Frontend smoke test successful."
+            else
+              echo "Frontend smoke test unsuccessful."
+            fi
           
       # - revert-migrations:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
