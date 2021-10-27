@@ -21,6 +21,7 @@ commands:
           when: on_fail
           command: |
             if aws s3 ls | grep udapeople-<< parameters.workflow_id >>; then
+              echo "Destroying environment: << parameters.workflow_id >> "
               aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
             fi
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
@@ -534,10 +535,10 @@ jobs:
               echo "Frontend smoke test unsuccessful."
               exit 1
             fi        
-      # - revert-migrations:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      # - destroy-environment:  
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:  
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
@@ -554,7 +555,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
-              --stack-name udapeople-blue \
+              --stack-name InitialStack \
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
@@ -664,8 +665,8 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update: 
-      #     requires: [smoke-test]
+      - cloudfront-update: 
+          requires: [smoke-test]
       # - install-node-exporter:
       #     requires: [cloudfront-update]
       # - cleanup:
