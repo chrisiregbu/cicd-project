@@ -492,7 +492,7 @@ jobs:
             apk add --no-cache --update ansible
             apk add --no-cache openssh-client
             pip3 install awscli
-            pip install --upgrade
+            pip3 install awscli --upgrade
       - run:
           name: Get backend url
           command: |         
@@ -517,11 +517,13 @@ jobs:
             
             echo ${URL}
 
-            if curl ${URL}" | grep "Welcome"
+            if curl -s ${URL}" | grep "Welcome"
             then
               echo "Frontend smoke test successful."
+              exit 0
             else
               echo "Frontend smoke test unsuccessful."
+              exit 1
             fi
           
       - revert-migrations:
