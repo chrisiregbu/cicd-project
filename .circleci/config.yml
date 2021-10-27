@@ -411,11 +411,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum -y install tar 
-            yum -y install gzip
-            curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
-            yum -y install nodejs
+            cd frontend
             npm install
+            npm run build
+            ls -lR dist
       - attach_workspace:
           at: ./
       - run:
@@ -438,7 +437,6 @@ jobs:
           name: Add aws-cli
           command: |
             sudo apt-get update
-            #sudo apt-get install awscli
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
@@ -497,12 +495,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
-            pip3 install awscli
-            pip3 install awscli --upgrade
+            sudo apt install curl
       - run:
           name: Get backend url
           command: |         
