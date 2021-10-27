@@ -408,6 +408,11 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "ef:69:64:e9:df:d5:5c:23:6f:ba:09:88:ef:ba:39:89"
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Install dependencies
           command: |
