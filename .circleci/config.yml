@@ -523,8 +523,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-
-            curl --connect-timeout 10 -s http://udapeople-<< pipeline.parameters.run_id >>.s3-website-eu-west-2.amazonaws.com | grep "Welcome"
+            curl --connect-timeout 10 -s http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-eu-west-2.amazonaws.com/#/employees | grep "Welcome"
             retval=$?
 
             echo $retval
