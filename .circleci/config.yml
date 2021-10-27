@@ -517,15 +517,14 @@ jobs:
             
             echo ${URL}
 
-            if curl -s ${URL}" | grep "Welcome"
+            if curl -s ${URL} | grep "Welcome"
             then
               echo "Frontend smoke test successful."
               exit 0
             else
               echo "Frontend smoke test unsuccessful."
               exit 1
-            fi
-          
+            fi        
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - destroy-environment:  
