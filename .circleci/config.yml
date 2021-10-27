@@ -515,9 +515,9 @@ jobs:
             echo ${API_URL}
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+                exit 0
             else
-                return 1
+                exit 1
             fi
       - run:
           name: Frontend smoke test.
@@ -529,10 +529,10 @@ jobs:
             if curl -v ${URL} | grep "Welcome"
             then
               echo "Frontend smoke test successful."
-              return 0
+              exit 0
             else
               echo "Frontend smoke test unsuccessful."
-              return 1
+              exit 1
             fi        
       # - revert-migrations:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
