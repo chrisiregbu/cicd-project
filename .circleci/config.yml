@@ -524,10 +524,10 @@ jobs:
               echo "Frontend smoke test unsuccessful."
               exit 1
             fi        
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy-environment:  
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      # - revert-migrations:
+      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      # - destroy-environment:  
+      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   
   # 5. Promotion Phase
   cloudfront-update:
