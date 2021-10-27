@@ -304,7 +304,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople
+              --tags project=udapeople-backend
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -312,7 +312,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople
+              --tags project=udapeople-frontend
       - run: # In this job, also run the 'cat' bash command that prints the contents of .circle/ansible/inventory.txt
           name: Add back-end IP to ansible inventory
           command: |
@@ -372,9 +372,24 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
+          name: prepare environment for backend build
+          command: |
+            echo "Preparing environment for backend build"
+            echo ENVIRONMENT=$ENVIRONMENT >> backend/.env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> backend/.env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> backend/.env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> backend/.env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> backend/.env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> backend/.env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
+      - run:
           name: Install dependencies
           command: |
-            sudo apt-get -y update
+            sudo apt update
+            sudo apt install -y awscli
       - run:
           name: Run migrations
           command: |
@@ -478,18 +493,15 @@ jobs:
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
-      - image:  python:3.7-alpine3.11  #circleci/node:13.8.0
+      - image:  circleci/node:13.8.0 # python:3.7-alpine3.11  
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
-            pip3 install awscli
-            pip3 install awscli --upgrade
+            sudo apt update
+            sudo apt install -y awscli
+            sudo apt install -y python3 ansible
       - run:
           name: Get backend url
           command: |         
@@ -500,27 +512,27 @@ jobs:
           command: |
             BACKEND_IP=$(cat backend-url.txt)
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            echo ${API_URL}
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                exit 0
+                return 0
             else
-                exit 1
+                return 1
             fi
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com/index.html"  
-            
+            URL="https://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3.${AWS_DEFAULT_REGION}.amazonaws.com/index.html"  
+
             echo ${URL}
 
             if curl -v ${URL} | grep "Welcome"
             then
               echo "Frontend smoke test successful."
-              exit 0
+              return 0
             else
               echo "Frontend smoke test unsuccessful."
-              exit 1
+              return 1
             fi        
       # - revert-migrations:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
