@@ -495,7 +495,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt install curl
+            apt install curl
       - run:
           name: Get backend url
           command: |         
