@@ -615,7 +615,6 @@ jobs:
               aws cloudformation delete-stack --stack-name udapeople-frontend-"${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name udapeople-cloudfront
             fi 
-
 # Orchestration/scheduling of jobs
 workflows:
   default:
