@@ -490,7 +490,7 @@ jobs:
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-
+  
   # 3. Smoke Test Phase
   smoke-test: # aka Verification
     docker:
@@ -578,27 +578,7 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-
-  # Setup Back-End Monitoring
-  # Create a job that uses Ansible to go into the EC2 instance and install the exporter.
-  install-node-exporter:
-    docker:
-      - image: python:3.9.1-alpine3.12
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update ansible aws-cli
-      - run:
-          name: Install node exporter
-          command: |
-            export hostname=$(cat ./.circleci/ansible/inventory.txt)
-            echo EC2 instance: "${hostname}"
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -vvv -i .circleci/ansible/inventory.txt .circleci/ansible/configure-prometheus-node-exporter/tasks/main.yml
-
+  
   # 6. Cleanup Phase
   cleanup:
     docker:
@@ -636,7 +616,7 @@ jobs:
               aws cloudformation delete-stack --stack-name udapeople-cloudfront
             fi 
 
-# Orchestrate or schedule the jobs
+# Orchestration/scheduling of jobs
 workflows:
   default:
     jobs:
