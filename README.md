@@ -45,6 +45,11 @@ For your submission, please submit the following:
 
 Before you submit your project, please check your work against the project rubric. If you haven’t satisfied each criterion in the rubric, then revise your work so that you have met all the requirements. 
 
+*********************************Note for the reviewer**********************************************************************
+The screenshots and urls were added to the project and pushed to the repository. This means that stacks were recreated
+therefore, the URLs seen on the screenshots will be different from the live application.
+***************************************************************************************************************************   
+
 ### Built With
 
 - [Circle CI](www.circleci.com) - Cloud-based CI/CD service
