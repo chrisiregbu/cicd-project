@@ -1,0 +1,10 @@
+URL01: https://github.com/chrisiregbu/cicd-project
+
+URL02: http://udapeople-10e87ac.s3-website.eu-west-2.amazonaws.com/
+
+URL03: https://d1hxovl4injbtz.cloudfront.net
+
+URL04: http://ec2-18-170-25-183.eu-west-2.compute.amazonaws.com:3030/api/status
+
+Prometheus Server -
+URL05: http://ec2-18-169-242-76.eu-west-2.compute.amazonaws.com:9090/targets
